@@ -4,14 +4,20 @@ using namespace std;
 
 Graph::Graph()
 {
-    fstream f("input.txt");
+    // Тут пусто...
+}
 
-    f >> format;
+void Graph::readGraph(string fileName){
+    const char *cstr = fileName.c_str(); // хз, но string не хотел принимать
+    fstream f(cstr);
+
+    f >> format; // представление графа
 
     switch(format){
-    case 'C':ь
-            int t;
+    case 'C': // матрица смежности
             f >> n >> w;
+
+            int t;
             for (int i = 0; i < n; i++){
                 graph.resize(n);
                 for (int j = 0; j < n; j++){
@@ -20,13 +26,25 @@ Graph::Graph()
                 }
             }
             break;
-    case 'L':
+    case 'L': // список смежности
             f >> n >> r >> w;
-            for (int i = 0; i < n; i++){
 
+            int bi, wi;
+            if (w) {
+                for (int i = 0; i < n; i++){
+
+                }
             }
+            else {
+                for (int i = 0; i < n; i++){
+
+                }
+            }
+
             break;
-    case 'E': break;
+    case 'E': // список ребер
+
+        break;
     }
 
     f.close();

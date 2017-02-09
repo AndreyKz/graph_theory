@@ -27,3 +27,11 @@
 *.exe
 *.out
 *.app
+
+# Something more
+bin/*
+obj/*
+.git/*
+*.cbp
+*.depend
+*.layout
