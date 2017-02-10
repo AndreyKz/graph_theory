@@ -43,8 +43,27 @@ void Graph::readGraph(string fileName){
 
             break;
     case 'E': // список ребер
+            f >> n >> m >> r >> w;
+            if (w)
+                graph5.resize(m);
+            else
+                graph4.resize(m);
 
-        break;
+            int ai, bi, wi;
+            if (w){
+                for (int i = 0; i < m; i++){
+                    f >> ai >> bi >> wi;
+                    graph5[i].push_back(make_tuple(ai, bi, wi));
+                }
+            }
+            else {
+                for (int i = 0; i < m; i++){
+                    f >> ai >> bi;
+                    graph5[i].push_back(make_pair(ai, bi));
+                }
+            }
+
+            break;
     }
 
     f.close();
