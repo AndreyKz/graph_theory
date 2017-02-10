@@ -35,3 +35,7 @@ obj/*
 *.cbp
 *.depend
 *.layout
+
+Debug/*
+*.vcxproj
+*.filters

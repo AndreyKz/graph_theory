@@ -10,5 +10,7 @@ int main()
 
     cout << g.getHello() << endl;
 
+	g.writeGraph("output.txt");
+
     return 0;
 }
