@@ -10,6 +10,8 @@ int main()
 
     cout << g.getHello() << endl;
 
+	g.addEdge(2, 4, 9);
+
 	g.writeGraph("output.txt");
 
     return 0;

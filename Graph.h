@@ -1,6 +1,7 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <fstream>
@@ -14,15 +15,27 @@ public:
 	Graph();
 
 	// TODO list
-	void readGraph(string);
-	void addEdge(int from, int to, int weight);
 	void removeEdge(int from, int to);
 	int changeEdge(int from, int to, int weight); // return old value of weight
 	void transformToAdjList();
 	void transformToAdjMatrix();
 	void transformToListOfEdges();
-	void writeGraph(string fileName);
 	// END of TODO list
+
+	void readGraph(string);
+	void readAdjMatrix(ifstream&);
+	void readAdjList(ifstream&);
+	void readListOfEdges(ifstream&);
+
+	void writeGraph(string fileName);
+	void writeAdjMatrix(ofstream&);
+	void writeAdjList(ofstream&);
+	void writeListOfEdges(ofstream&);
+
+	void addEdge(int, int, int = 0);
+	void addAdjMatrix(int, int, int = 0);
+	void addAdjList(int, int, int = 0);
+	void addListOfEdges(int, int, int = 0);
 
 	string getHello();
 
