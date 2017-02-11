@@ -262,6 +262,180 @@ void Graph::addEdge(int from, int to, int weight) {
 
 }
 
+void Graph::removeAdjMatrix(int from, int to) {
+	graph[from][to] = 0;
+	if (!r)
+		graph[to][from] = 0;
+}
+
+void Graph::removeAdjList(int from, int to) {
+	if (w) {
+		for (int i = 0; i < graph3[from].size(); i++) {
+			if (graph3[from][i].first == to + 1) {
+				graph3[from][i].first = 0;
+				graph3[from][i].second = 0;
+			}
+		}
+		if (!r) {
+			for (int i = 0; i < graph3[to].size(); i++) {
+				if (graph3[to][i].first == from + 1) {
+					graph3[to][i].first = 0;
+					graph3[to][i].second = 0;
+					return;
+				}
+			}
+		}
+	}
+	else {
+		for (int i = 0; i < graph2[from].size(); i++) {
+			if (graph2[from][i] == to + 1) {
+				graph2[from][i] = 0;
+				graph2[from][i] = 0;
+			}
+		}
+		if (!r) {
+			for (int i = 0; i < graph2[to].size(); i++) {
+				if (graph2[to][i] == from + 1) {
+					graph2[to][i] = 0;
+					graph2[to][i] = 0;
+					return;
+				}
+			}
+		}
+	}
+}
+
+void Graph::removeListOfEdges(int from, int to) {
+	if (w) {
+		for (int i = 0; i < graph5.size(); i++) {
+			if (get<0>(graph5[i]) == from + 1 && get<1>(graph5[i]) == to + 1) {
+				get<0>(graph5[i]) = 0;
+				get<1>(graph5[i]) = 0;
+				get<2>(graph5[i]) = 0;
+				return;
+			}
+			if (!r) {
+				if (get<0>(graph5[i]) == to + 1 && get<1>(graph5[i]) == from + 1) {
+					get<0>(graph5[i]) = 0;
+					get<1>(graph5[i]) = 0;
+					get<2>(graph5[i]) = 0;
+					return;
+				}
+			}
+		}
+	}
+	else {
+		for (int i = 0; i < graph4.size(); i++) {
+			if (graph4[i].first == from + 1 && graph4[i].second == to + 1) {
+				graph4[i].first = 0;
+				graph4[i].second = 0;
+				return;
+			}
+			if (!r) {
+				if (graph4[i].first == to + 1 && graph4[i].second == from + 1) {
+					graph4[i].first = 0;
+					graph4[i].second = 0;
+					return;
+				}
+			}
+		}
+	}
+}
+
+void Graph::removeEdge(int from, int to) {
+
+	--from;
+	--to;
+
+	switch (format) {
+	case 'C':
+		removeAdjMatrix(from, to);
+		break;
+	case 'L':
+		removeAdjList(from, to);
+		break;
+	case 'E':
+		removeListOfEdges(from, to);
+		break;
+	}
+}
+
+int Graph::changeAdjMatrix(int from, int to, int weight) {
+	int old_w = graph[from][to];
+
+	if (graph[from][to]) {
+		graph[from][to] = weight;
+		if (!r) {
+			graph[to][from] = weight;
+		}
+	}
+
+	return old_w;
+}
+
+int Graph::changeAdjList(int from, int to, int weight) {
+	int old_w = 0;
+
+	if (w) {
+		for (int i = 0; i < graph3[from].size(); i++) {
+			if (graph3[from][i].first == to + 1) {
+				old_w = graph3[from][i].second;
+				graph3[from][i].second = weight;
+			}
+		}
+		if (!r) {
+			for (int i = 0; i < graph3[to].size(); i++) {
+				if (graph3[to][i].first == from + 1) {
+					graph3[to][i].second = weight;
+				}
+			}
+		}
+	}
+
+	return old_w;
+}
+
+int Graph::changeListOfEdges(int from, int to, int weight) {
+	int old_w = 0;
+
+	if (w) {
+		for (int i = 0; i < graph5.size(); i++) {
+			if (get<0>(graph5[i]) == from + 1 && get<1>(graph5[i]) == to + 1) {
+				old_w = get<2>(graph5[i]);
+				get<2>(graph5[i]) = weight;
+			}
+			if (!r) {
+				if (get<0>(graph5[i]) == to + 1 && get<1>(graph5[i]) == from + 1) {
+					get<2>(graph5[i]) = weight;
+				}
+			}
+		}
+	}
+
+	return old_w;
+}
+
+int Graph::changeEdge(int from, int to, int weight) {
+
+	--from;
+	--to;
+
+	switch (format)
+	{
+	case 'C':
+		return changeAdjMatrix(from, to, weight);
+		break;
+	case 'L':
+		return changeAdjList(from, to, weight);
+		break;
+	case 'E':
+		return changeListOfEdges(from, to, weight);
+		break;
+	}
+
+	return 0;
+}
+
 string Graph::getHello(){
     return "Hello World!";
 }

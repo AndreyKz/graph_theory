@@ -15,27 +15,41 @@ public:
 	Graph();
 
 	// TODO list
-	void removeEdge(int from, int to);
-	int changeEdge(int from, int to, int weight); // return old value of weight
 	void transformToAdjList();
 	void transformToAdjMatrix();
 	void transformToListOfEdges();
 	// END of TODO list
 
+	// read
 	void readGraph(string);
 	void readAdjMatrix(ifstream&);
 	void readAdjList(ifstream&);
 	void readListOfEdges(ifstream&);
 
+	// write
 	void writeGraph(string fileName);
 	void writeAdjMatrix(ofstream&);
 	void writeAdjList(ofstream&);
 	void writeListOfEdges(ofstream&);
 
+	// add
 	void addEdge(int, int, int = 0);
 	void addAdjMatrix(int, int, int = 0);
 	void addAdjList(int, int, int = 0);
 	void addListOfEdges(int, int, int = 0);
+
+	// remove
+	void removeEdge(int, int);
+	void removeAdjMatrix(int, int);
+	void removeAdjList(int, int);
+	void removeListOfEdges(int, int);
+
+	// change
+	int changeEdge(int, int, int = 0);
+	int changeAdjMatrix(int, int, int = 0);
+	int changeAdjList(int, int, int = 0);
+	int changeListOfEdges(int, int, int = 0);
+
 
 	string getHello();
 
