@@ -14,11 +14,18 @@ class Graph
 public:
 	Graph();
 
-	// TODO list
-	void transformToAdjList();
+	// TRANSFORMERS!!!
 	void transformToAdjMatrix();
+	void transformLToAdjMatrix();
+	void transformEToAdjMatrix();
+
+	void transformToAdjList();
+	void transformCToAdjList();
+	void transformEToAdjList();
+
 	void transformToListOfEdges();
-	// END of TODO list
+	void transformCToListOfEdges();
+	void transformLToListOfEdges();
 
 	// read
 	void readGraph(string);

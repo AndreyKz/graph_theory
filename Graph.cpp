@@ -4,7 +4,9 @@ using namespace std;
 
 Graph::Graph()
 {
-	format = n = m = r = w = 0;
+	// самый крутой конструктор в мире
+	format = n = m = w = 0;
+	r = 1;
 }
 
 void Graph::readAdjMatrix(ifstream & f) {
@@ -434,6 +436,243 @@ int Graph::changeEdge(int from, int to, int weight) {
 	}
 
 	return 0;
+}
+
+void Graph::transformLToAdjMatrix() {
+
+	if (w) {
+		for (int i = 0; i < graph3.size(); i++) {
+			for (int j = 0; j < graph3[i].size(); j++) {
+				graph[i][graph3[i][j].first - 1] = graph3[i][j].second;
+				if (!r)
+					graph[graph3[i][j].first - 1][i] = graph3[i][j].second;
+			}
+		}
+	}
+	else {
+		for (int i = 0; i < graph2.size(); i++) {
+			for (int j = 0; j < graph2[i].size(); j++) {
+				graph[i][graph2[i][j] - 1] = 1;
+				if (!r)
+					graph[graph2[i][j] - 1][i] = 1;
+			}
+		}
+	}
+}
+
+void Graph::transformEToAdjMatrix() {
+
+	if (w) {
+		for (int i = 0; i < graph5.size(); i++) {
+			graph[get<0>(graph5[i]) - 1][get<1>(graph5[i]) - 1] = get<2>(graph5[i]);
+			if (!r)
+				graph[get<1>(graph5[i]) - 1][get<0>(graph5[i]) - 1] = get<2>(graph5[i]);
+		}
+	}
+	else {
+		for (int i = 0; i < graph4.size(); i++) {
+			graph[graph4[i].first - 1][graph4[i].second - 1] = 1;
+			if (!r)
+				graph[graph4[i].second - 1][graph4[i].first - 1] = 1;
+		}
+	}
+}
+
+void Graph::transformToAdjMatrix() {
+	if (format == 'C') return;
+
+	graph.clear();
+
+	graph.resize(n);
+	for (int i = 0; i < graph.size(); i++) {
+		graph[i].resize(n);
+		for (int j = 0; j < graph[i].size(); j++) {
+			graph[i][j] = 0;
+		}
+	}
+
+	switch (format) {	
+	case 'L':
+		transformLToAdjMatrix();
+		break;
+	case 'E':
+		transformEToAdjMatrix();
+		break;
+	}
+
+	format = 'C';
+}
+
+void Graph::transformCToAdjList() {
+	if (w) {
+		for (int i = 0; i < graph.size(); i++) {
+			for (int j = 0; j < graph[i].size(); j++) {
+				if (graph[i][j])
+					graph3[i].push_back(make_pair(j + 1, graph[i][j]));
+			}
+		}
+	}
+	else {
+		for (int i = 0; i < graph.size(); i++) {
+			for (int j = 0; j < graph[i].size(); j++) {
+				if (graph[i][j])
+					graph2[i].push_back(j + 1);
+			}
+		}
+	}
+}
+
+void Graph::transformEToAdjList() {
+	if (w) {
+		for (int i = 0; i < graph5.size(); i++) {
+			graph3[get<0>(graph5[i])].push_back(make_pair(get<1>(graph5[i]), get<2>(graph5[i])));
+			if (!r)
+				graph3[get<1>(graph5[i])].push_back(make_pair(get<0>(graph5[i]), get<2>(graph5[i])));
+		}
+	}
+	else {
+		for (int i = 0; i < graph4.size(); i++) {
+			graph2[graph4[i].first].push_back(graph4[i].second);
+			if (!r)
+				graph2[graph4[i].second].push_back(graph4[i].first);
+		}
+	}
+}
+
+void Graph::transformToAdjList() {
+	if (format == 'L') return;
+
+	graph2.clear();
+	graph3.clear();
+
+	if (w) {
+		graph3.resize(n);
+	}
+	else {
+		graph2.resize(n);
+	}
+
+	switch (format) {
+	case 'C':
+		transformCToAdjList();
+		break;
+	case 'E':
+		transformEToAdjList();
+		break;
+	}
+
+	format = 'L';
+}
+
+void Graph::transformCToListOfEdges() {
+	format = 'E';
+	for (int i = 0; i < graph.size(); i++) {
+		for (int j = 0; j < graph[i].size(); j++) {
+			if (graph[i][j]) {
+				addEdge(i + 1, j + 1, graph[i][j]);
+			}
+		}
+	}
+
+	/*if (w) {
+		if (r) {
+			for (int i = 0; i < graph.size(); i++) {
+				for (int j = 0; j < graph[i].size(); j++) {
+					if (graph[i][j]) {
+						graph5.push_back(make_tuple(i + 1, j + 1, graph[i][j]));
+						m++;
+					}
+				}
+			}
+		}
+		else {
+			for (int i = 0; i < graph.size(); i++) {
+				for (int j = i; j < graph[i].size(); j++) {
+					if (graph[i][j]) {
+						graph5.push_back(make_tuple(i + 1, j + 1, graph[i][j]));
+						m++;
+					}
+				}
+			}
+		}
+	}
+	else {
+		if (r) {
+			for (int i = 0; i < graph.size(); i++) {
+				for (int j = 0; j < graph[i].size(); j++) {
+					if (graph[i][j]) {
+						graph4.push_back(make_pair(i + 1, j + 1));
+						m++;
+					}
+				}
+			}
+		}
+		else {
+			for (int i = 0; i < graph.size(); i++) {
+				for (int j = i; j < graph[i].size(); j++) {
+					if (graph[i][j]) {
+						graph4.push_back(make_pair(i + 1, j + 1));
+						m++;
+					}
+				}
+			}
+		}
+	}*/
+}
+
+void Graph::transformLToListOfEdges() {
+	format = 'E';
+	if (w) {
+		for (int i = 0; i < graph3.size(); i++) {
+			for (int j = 0; j < graph3[i].size(); j++) {
+				addEdge(i + 1, graph3[i][j].first, graph3[i][j].second);
+			}
+		}
+	}
+	else {
+		for (int i = 0; i < graph2.size(); i++) {
+			for (int j = 0; j < graph2[i].size(); j++) {
+				addEdge(i + 1, graph2[i][j]);
+			}
+		}
+	}
+	
+
+	/*if (w) {
+		for (int i = 0; i < graph3.size(); i++) {
+			for (int j = 0; j < graph3[i].size(); j++) {
+				graph5.push_back(make_tuple(i + 1, graph3[i][j].first, graph3[i][j].second));
+				m++;
+			}
+		}
+	}
+	else {
+		for (int i = 0; i < graph2.size(); i++) {
+			for (int j = 0; j < graph2[i].size(); j++) {
+				graph4.push_back(make_pair(i + 1, graph2[i][j]));
+				m++;
+			}
+		}
+	}*/
+}
+
+void Graph::transformToListOfEdges() {
+	if (format == 'E') return;
+
+	graph4.clear();
+	graph5.clear();
+
+	switch (format)
+	{
+	case 'C':
+		transformCToListOfEdges();
+		break;
+	case 'L':
+		transformLToListOfEdges();
+		break;
+	}
+
+	format = 'E';
 }
 
 string Graph::getHello(){

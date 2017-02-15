@@ -10,9 +10,11 @@ int main()
 
     cout << g.getHello() << endl;
 
-	g.addEdge(2, 4, 9);
-	g.removeEdge(2, 1);
-	g.changeEdge(4, 2, 10);
+	//g.addEdge(2, 4, 9);
+	//g.removeEdge(2, 1);
+	//g.changeEdge(4, 2, 10);
+
+	g.transformToListOfEdges();
 
 	g.writeGraph("output.txt");
 
