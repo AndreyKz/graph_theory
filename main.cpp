@@ -14,7 +14,7 @@ int main()
 	//g.removeEdge(2, 1);
 	//g.changeEdge(4, 2, 10);
 
-	g.transformToListOfEdges();
+	g.transformToAdjMatrix();
 
 	g.writeGraph("output.txt");
 

@@ -39,3 +39,6 @@ obj/*
 Debug/*
 *.vcxproj
 *.filters
+
+
+graph.txt

@@ -188,23 +188,23 @@ void Graph::addAdjMatrix(int from, int to, int weight) {
 
 void Graph::addAdjList(int from, int to, int weight) {
 	if (w) {
-		bool flag = false;
+		/*bool flag = false;
 		for (int j = 0; j < graph3[from].size(); j++) {
 			if (graph3[from][j].first == to + 1)
 				flag = true;
 		}
-		if (!flag)
+		if (!flag)*/
 			graph3[from].push_back(make_pair(to + 1, weight));
 		if (!r)
 			graph3[to].push_back(make_pair(from + 1, weight));
 	}
 	else {
-		bool flag = false;
+		/*bool flag = false;
 		for (int j = 0; j < graph2[from].size(); j++) {
 			if (graph2[from][j] == to + 1)
 				flag = true;
 		}
-		if (!flag)
+		if (!flag)*/
 			graph2[from].push_back(to + 1);
 		if (!r)
 			graph2[to].push_back(from + 1);
@@ -213,7 +213,7 @@ void Graph::addAdjList(int from, int to, int weight) {
 
 void Graph::addListOfEdges(int from, int to, int weight) {
 	if (w) {
-		for (int i = 0; i < m; i++) {
+		/*for (int i = 0; i < m; i++) {
 			if (!r) {
 				if ((get<0>(graph5[i]) == from + 1 && get<1>(graph5[i]) == to + 1) || (get<0>(graph5[i]) == to + 1 && get<1>(graph5[i]) == from + 1))
 					return;
@@ -222,11 +222,11 @@ void Graph::addListOfEdges(int from, int to, int weight) {
 				if (get<0>(graph5[i]) == from + 1 && get<1>(graph5[i]) == to + 1)
 					return;
 			}
-		}
+		}*/
 		graph5.push_back(make_tuple(from + 1, to + 1, weight));
 	}
 	else {
-		for (int i = 0; i < m; i++) {
+		/*for (int i = 0; i < m; i++) {
 			if (!r) {
 				if ((graph4[i].first == from + 1 && graph4[i].second == to + 1) || (graph4[i].first == to + 1 && graph4[i].second == from + 1))
 					return;
@@ -235,7 +235,7 @@ void Graph::addListOfEdges(int from, int to, int weight) {
 				if (graph4[i].first == from + 1 && graph4[i].second == to + 1)
 					return;
 			}
-		}
+		}*/
 		graph4.push_back(make_pair(from + 1, to + 1));
 	}
 
@@ -525,16 +525,16 @@ void Graph::transformCToAdjList() {
 void Graph::transformEToAdjList() {
 	if (w) {
 		for (int i = 0; i < graph5.size(); i++) {
-			graph3[get<0>(graph5[i])].push_back(make_pair(get<1>(graph5[i]), get<2>(graph5[i])));
+			graph3[get<0>(graph5[i]) - 1].push_back(make_pair(get<1>(graph5[i]), get<2>(graph5[i])));
 			if (!r)
-				graph3[get<1>(graph5[i])].push_back(make_pair(get<0>(graph5[i]), get<2>(graph5[i])));
+				graph3[get<1>(graph5[i]) - 1].push_back(make_pair(get<0>(graph5[i]), get<2>(graph5[i])));
 		}
 	}
 	else {
 		for (int i = 0; i < graph4.size(); i++) {
-			graph2[graph4[i].first].push_back(graph4[i].second);
+			graph2[graph4[i].first - 1].push_back(graph4[i].second);
 			if (!r)
-				graph2[graph4[i].second].push_back(graph4[i].first);
+				graph2[graph4[i].second - 1].push_back(graph4[i].first);
 		}
 	}
 }
