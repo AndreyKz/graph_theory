@@ -526,15 +526,11 @@ void Graph::transformEToAdjList() {
 	if (w) {
 		for (int i = 0; i < graph5.size(); i++) {
 			graph3[get<0>(graph5[i]) - 1].push_back(make_pair(get<1>(graph5[i]), get<2>(graph5[i])));
-			if (!r)
-				graph3[get<1>(graph5[i]) - 1].push_back(make_pair(get<0>(graph5[i]), get<2>(graph5[i])));
 		}
 	}
 	else {
 		for (int i = 0; i < graph4.size(); i++) {
 			graph2[graph4[i].first - 1].push_back(graph4[i].second);
-			if (!r)
-				graph2[graph4[i].second - 1].push_back(graph4[i].first);
 		}
 	}
 }
