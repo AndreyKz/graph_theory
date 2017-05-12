@@ -5,12 +5,26 @@ using namespace std;
 Graph::Graph()
 {
 	// самый крутой конструктор в мире
-	format = n = m = w = 0;
-	r = 1;
+	format = n = m = r = w = 0;
+}
+
+Graph::Graph(int num)
+{
+	n = num;
+	format = 'C';
+	r = 0;
+	w = 1;
+
+	graph.resize(n);
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			graph[i].push_back(0);
+		}
+	}
 }
 
 void Graph::readAdjMatrix(ifstream & f) {
-	f >> n >> w;
+	f >> n >> r >> w;
 
 	int t;
 	for (int i = 0; i < n; i++) {
@@ -54,12 +68,14 @@ void Graph::readAdjList(ifstream & f) {
 
 		if (w) {
 			for (int j = 0; j < arr.size(); j += 2) {
-				graph3[i].push_back(make_pair(stoi(arr[j]), stoi(arr[j + 1])));
+				if (stoi(arr[j]))
+					graph3[i].push_back(make_pair(stoi(arr[j]), stoi(arr[j + 1])));
 			}
 		}
 		else {
 			for (int j = 0; j < arr.size(); j++) {
-				graph2[i].push_back(stoi(arr[j]));
+				if (stoi(arr[j]))
+					graph2[i].push_back(stoi(arr[j]));
 			}
 		}
 	}
@@ -123,7 +139,8 @@ void Graph::writeAdjList(ofstream & f) {
 	if (w) {
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < graph3[i].size(); j++) {
-				f << graph3[i][j].first << " " << graph3[i][j].second << " ";
+				if (graph3[i][j].first && graph3[i][j].second)
+					f << graph3[i][j].first << " " << graph3[i][j].second << " ";
 			}
 			f << endl;
 		}
@@ -131,7 +148,8 @@ void Graph::writeAdjList(ofstream & f) {
 	else {
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < graph2[i].size(); j++) {
-				f << graph2[i][j] << " ";
+				if (graph2[i][j])
+					f << graph2[i][j] << " ";
 			}
 			f << endl;
 		}
@@ -143,12 +161,14 @@ void Graph::writeListOfEdges(ofstream & f) {
 
 	if (w) {
 		for (int i = 0; i < m; i++) {
-			f << get<0>(graph5[i]) << " " << get<1>(graph5[i]) << " " << get<2>(graph5[i]) << endl;
+			if (get<0>(graph5[i]) && get<1>(graph5[i]))
+				f << get<0>(graph5[i]) << " " << get<1>(graph5[i]) << " " << get<2>(graph5[i]) << endl;
 		}
 	}
 	else {
 		for (int i = 0; i < m; i++) {
-			f << graph4[i].first << " " << graph4[i].second << endl;
+			if (graph4[i].first && graph4[i].second)
+				f << graph4[i].first << " " << graph4[i].second << endl;
 		}
 	}
 }
@@ -417,6 +437,81 @@ int Graph::changeListOfEdges(int from, int to, int weight) {
 	return old_w;
 }
 
+Graph Graph::getSpaningTreePrima()
+{
+	Graph ng = Graph(n);             // новый граф для возвращения
+
+	vector <int> to_visit(n - 1, 0); // вершины которые нужно посетить
+	vector <int> visited(n, 0);      // посещенные вершины
+	vector <int> result;             // результат
+
+	visited[0] = 1;                  // посещаем первую вершину
+	// result.push_back(0);
+
+	// вектор to_visit в вид 1, 2, 3 ...
+	for (int i = 0; i < n - 1; i++) {
+		to_visit[i] = i + 1;
+	}
+
+	// находим максимум в исходном графе
+	int max_w = 0;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			if (graph[i][j] > max_w)
+				max_w = graph[i][j];
+		}
+	}
+	
+	// основной цикл
+	for (int i = 0; i < to_visit.size(); i++) {
+
+		int min_w = max_w; // минимальный вес
+		int index = -1; // вершина с минимальным весом
+		int f_index; // вершина от которой можно добраться до index
+		for (int j = 0; j < visited.size(); j++) {
+			if (visited[j]) {
+				for (int k = 0; k < graph[j].size(); k++) {
+					if (graph[j][k] > 0 && graph[j][k] < min_w && !visited[k]) {
+						min_w = graph[j][k];
+						index = k;
+						f_index = j;
+						//cout << visited[j] << k << min_w << endl;
+					}
+				}
+			}
+		}
+
+		if (index != -1) {
+			result.push_back(min_w);
+			visited[index] = 1;
+			ng.addEdge(f_index + 1, index + 1, min_w); // добавляем ребро
+		}
+	}
+
+	for (int i = 0; i < result.size(); i++) {
+		cout << result[i] << " ";
+	}
+	cout << endl;
+
+	for (int i = 0; i < visited.size(); i++) {
+		if (visited[i])
+			cout << i + 1 << " ";
+	}
+	cout << endl;
+
+	return ng;
+}
+
+Graph Graph::getSpaningTreeKruscal()
+{
+	return Graph();
+}
+
+Graph Graph::getSpaningTreeBoruvka()
+{
+	return Graph();
+}
+
 int Graph::changeEdge(int from, int to, int weight) {
 
 	--from;
@@ -443,18 +538,22 @@ void Graph::transformLToAdjMatrix() {
 	if (w) {
 		for (int i = 0; i < graph3.size(); i++) {
 			for (int j = 0; j < graph3[i].size(); j++) {
-				graph[i][graph3[i][j].first - 1] = graph3[i][j].second;
-				if (!r)
-					graph[graph3[i][j].first - 1][i] = graph3[i][j].second;
+				if (graph3[i][j].first) {
+					graph[i][graph3[i][j].first - 1] = graph3[i][j].second;
+					if (!r)
+						graph[graph3[i][j].first - 1][i] = graph3[i][j].second;
+				}
 			}
 		}
 	}
 	else {
 		for (int i = 0; i < graph2.size(); i++) {
 			for (int j = 0; j < graph2[i].size(); j++) {
-				graph[i][graph2[i][j] - 1] = 1;
-				if (!r)
-					graph[graph2[i][j] - 1][i] = 1;
+				if (graph2[i][j]) {
+					graph[i][graph2[i][j] - 1] = 1;
+					if (!r)
+						graph[graph2[i][j] - 1][i] = 1;
+				}
 			}
 		}
 	}
@@ -621,14 +720,16 @@ void Graph::transformLToListOfEdges() {
 	if (w) {
 		for (int i = 0; i < graph3.size(); i++) {
 			for (int j = 0; j < graph3[i].size(); j++) {
-				addEdge(i + 1, graph3[i][j].first, graph3[i][j].second);
+				if (graph3[i][j].first)
+					addEdge(i + 1, graph3[i][j].first, graph3[i][j].second);
 			}
 		}
 	}
 	else {
 		for (int i = 0; i < graph2.size(); i++) {
 			for (int j = 0; j < graph2[i].size(); j++) {
-				addEdge(i + 1, graph2[i][j]);
+				if (graph2[i][j])
+					addEdge(i + 1, graph2[i][j]);
 			}
 		}
 	}

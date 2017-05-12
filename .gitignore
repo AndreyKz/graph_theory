@@ -40,5 +40,5 @@ Debug/*
 *.vcxproj
 *.filters
 
-
-graph.txt
+*.txt
+*.png
