@@ -9,7 +9,7 @@ int main()
 
     Graph g = Graph();
 	Graph ng;
-    g.readGraph("tests/test_al_min.txt");
+    g.readGraph("tests/test_le_min.txt");
 
     cout << g.getHello() << endl;
 

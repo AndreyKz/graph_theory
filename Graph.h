@@ -84,9 +84,9 @@ private:
 	void readListOfEdges(FILE&);
 
 	// write
-	void writeAdjMatrix(ofstream&);
-	void writeAdjList(ofstream&);
-	void writeListOfEdges(ofstream&);
+	void writeAdjMatrix(FILE&);
+	void writeAdjList(FILE&);
+	void writeListOfEdges(FILE&);
 
 	// add
 	void addAdjMatrix(int, int, int = 0);

@@ -139,76 +139,80 @@ void Graph::readGraph(string fileName){
     fclose(f);
 }
 
-void Graph::writeAdjMatrix(ofstream & f) {
-	f << " " << n << "\n" << r << " " << w << endl;
+void Graph::writeAdjMatrix(FILE & f) {
+	fprintf(&f, " %d\n%d %d", n, r, w);
 
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
-			f << graph[i][j] << " ";
+			fprintf(&f, "%d ", graph[i][j]);
 		}
-		f << endl;
+		fprintf(&f, "\n");
 	}
 }
 
-void Graph::writeAdjList(ofstream & f) {
-	f << " " << n << endl << r << " " << w << endl;
+void Graph::writeAdjList(FILE & f) {
+	fprintf(&f, " %d\n%d %d\n", n, r, w);
 
 	if (w) {
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < graph3[i].size(); j++) {
 				if (graph3[i][j].first && graph3[i][j].second)
-					f << graph3[i][j].first << " " << graph3[i][j].second << " ";
+					fprintf(&f, "%d %d ", graph3[i][j].first, graph3[i][j].second);
 			}
-			f << endl;
+			fprintf(&f, "\n");
 		}
 	}
 	else {
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < graph2[i].size(); j++) {
 				if (graph2[i][j])
-					f << graph2[i][j] << " ";
+					fprintf(&f, "%d ", &graph2[i][j]);
 			}
-			f << endl;
+			fprintf(&f, "\n");
 		}
 	}
 }
 
-void Graph::writeListOfEdges(ofstream & f) {
-	f << " " << n << " " << m << endl << r << " " << w << endl;
+void Graph::writeListOfEdges(FILE & f) {
+	fprintf(&f, " %d %d\n%d %d\n", n, m, r, w);
 
 	if (w) {
 		for (int i = 0; i < m; i++) {
 			if (get<0>(graph5[i]) && get<1>(graph5[i]))
-				f << get<0>(graph5[i]) << " " << get<1>(graph5[i]) << " " << get<2>(graph5[i]) << endl;
+				fprintf(&f, "%d %d %d\n", get<0>(graph5[i]), get<1>(graph5[i]), get<2>(graph5[i]));
 		}
 	}
 	else {
 		for (int i = 0; i < m; i++) {
 			if (graph4[i].first && graph4[i].second)
-				f << graph4[i].first << " " << graph4[i].second << endl;
+				fprintf(&f, "%d %d\n", graph4[i].first, graph4[i].second);
 		}
 	}
 }
 
 void Graph::writeGraph(string fileName) {
 	const char *cstr = fileName.c_str(); // хз, но string не хотел принимать
-	ofstream f(cstr);
+	
+	FILE *f;
+	f = fopen(cstr, "w");
 
-	f << format;
+	fprintf(f, "%c", format);
 
 	switch (format) {
 	case 'C': 
-		writeAdjMatrix(f);
+		writeAdjMatrix(*f);
 		break;
 
 	case 'L':
-		writeAdjList(f);
+		writeAdjList(*f);
 		break;
 
 	case 'E':
-		writeListOfEdges(f);
+		writeListOfEdges(*f);
 		break;
 	}
+
+	fclose(f);
 }
 
 void Graph::addAdjMatrix(int from, int to, int weight) {
