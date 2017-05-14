@@ -6,6 +6,9 @@
 #include <vector>
 #include <fstream>
 #include <tuple>
+#include <algorithm>
+#include <set>
+#include "DSU.h"
 
 using namespace std;
 
@@ -13,7 +16,7 @@ class Graph
 {
 public:
 	Graph();
-	Graph(int);
+	Graph(int, char);
 
 	// TRANSFORMERS!!!
 	void transformToAdjMatrix();
@@ -49,7 +52,12 @@ private:
 
 	int n, m, r, w; // обозначения ровно те же, что и в условии
 
-	vector<vector<int> >             graph; // матрица смежности
+	int max_elem;   // максимальный вес ребра 
+
+	vector <vector <pair <int, int> > > sorted_v;  // отстортированное по весу (если взвешенный)
+	                                               // для каждой вершины хранится вес и конечная вершина
+
+	vector<vector<int> >             graph;  // матрица смежности
 
 	vector<vector<int> >             graph2; // список смежности (невзвешенный)
 	vector<vector<pair<int, int> > > graph3; // список смежности (взвешенный)

@@ -9,12 +9,12 @@ int main()
 
     Graph g = Graph();
 	Graph ng;
-    g.readGraph("input.txt");
+    g.readGraph("tests/test_al_big.txt");
 
     cout << g.getHello() << endl;
 
-	g.transformToAdjMatrix();
-	ng = g.getSpaningTreePrima();
+	// g.transformToAdjMatrix();
+	ng = g.getSpaningTreeKruscal();
 	g.writeGraph("output.txt");
 	ng.writeGraph("output2.txt");
 
@@ -47,7 +47,7 @@ int main()
 
 
 
-	g.writeGraph("output.txt");
+	//g.writeGraph("output.txt");
 
     return 0;
 }

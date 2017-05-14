@@ -8,18 +8,29 @@ Graph::Graph()
 	format = n = m = r = w = 0;
 }
 
-Graph::Graph(int num)
+Graph::Graph(int num, char form)
 {
 	n = num;
-	format = 'C';
+	m = 0;
+	format = form;
 	r = 0;
 	w = 1;
 
-	graph.resize(n);
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < n; j++) {
-			graph[i].push_back(0);
+	switch (format){
+	case 'C':
+		graph.resize(n);
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				graph[i].push_back(0);
+			}
 		}
+		break;
+	case 'L':
+		graph3.resize(n);
+		break;
+	case 'E':
+		
+		break;
 	}
 }
 
@@ -27,13 +38,28 @@ void Graph::readAdjMatrix(ifstream & f) {
 	f >> n >> r >> w;
 
 	int t;
+	graph.resize(n);
+	sorted_v.resize(n);
 	for (int i = 0; i < n; i++) {
-		graph.resize(n);
 		for (int j = 0; j < n; j++) {
 			f >> t;
 			graph[i].push_back(t);
+
+			// если взвешенный заполняем массив с отсортированными весами
+			if (w && t != 0) {
+				sorted_v[i].push_back(make_pair(t, j));
+			}
 		}
 	}
+
+	if (w) {
+		for (int i = 0; i < n; i++) {
+			sort(sorted_v[i].begin(), sorted_v[i].end());
+			reverse(sorted_v[i].begin(), sorted_v[i].end());
+		}
+	}
+
+	// cout << sorted_v[0].first << " " << sorted_v[sorted_v.size() - 1].first << endl;
 }
 
 void Graph::readAdjList(ifstream & f) {
@@ -65,6 +91,10 @@ void Graph::readAdjList(ifstream & f) {
 		string tmp = str.substr(prev);
 
 		arr.push_back(str.substr(prev));
+
+		// если в конце был пробел, убираем его
+		if (arr[arr.size() - 1] == "")
+			arr.pop_back();
 
 		if (w) {
 			for (int j = 0; j < arr.size(); j += 2) {
@@ -123,7 +153,7 @@ void Graph::readGraph(string fileName){
 }
 
 void Graph::writeAdjMatrix(ofstream & f) {
-	f << " " << n << " " << w << endl;
+	f << " " << n << "\n" << r << " " << w << endl;
 
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
@@ -439,72 +469,189 @@ int Graph::changeListOfEdges(int from, int to, int weight) {
 
 Graph Graph::getSpaningTreePrima()
 {
-	Graph ng = Graph(n);             // новый граф для возвращения
-
-	vector <int> to_visit(n - 1, 0); // вершины которые нужно посетить
-	vector <int> visited(n, 0);      // посещенные вершины
-	vector <int> result;             // результат
-
-	visited[0] = 1;                  // посещаем первую вершину
-	// result.push_back(0);
-
-	// вектор to_visit в вид 1, 2, 3 ...
-	for (int i = 0; i < n - 1; i++) {
-		to_visit[i] = i + 1;
-	}
+	Graph ng = Graph(n, format);             // новый граф для возвращения
 
 	// находим максимум в исходном графе
 	int max_w = 0;
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < n; j++) {
-			if (graph[i][j] > max_w)
-				max_w = graph[i][j];
+	if (format == 'C') {
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				if (graph[i][j] > max_w) {
+					max_w = graph[i][j];
+				}
+			}
 		}
 	}
-	
-	// основной цикл
-	for (int i = 0; i < to_visit.size(); i++) {
+	else if (format == 'L') {
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < graph3[i].size(); j++) {
+				if (graph3[i][j].second > max_w) {
+					max_w = graph3[i][j].second;
+				}
+			}
+		}
+	}
+	else if (format == 'E') {
+		for (int i = 0; i < graph5.size(); i++) {
+			if (get<2>(graph5[i]) > max_w) {
+				max_w = get<2>(graph5[i]);
+			}
+		}
+	}
 
-		int min_w = max_w; // минимальный вес
-		int index = -1; // вершина с минимальным весом
-		int f_index; // вершина от которой можно добраться до index
-		for (int j = 0; j < visited.size(); j++) {
-			if (visited[j]) {
-				for (int k = 0; k < graph[j].size(); k++) {
-					if (graph[j][k] > 0 && graph[j][k] < min_w && !visited[k]) {
-						min_w = graph[j][k];
-						index = k;
-						f_index = j;
-						//cout << visited[j] << k << min_w << endl;
-					}
+	vector <bool> visited(n, false);      // посещенные вершины
+	vector <int> min_e(n, max_w + 1);     // минимальные ребра
+	vector <int> sel_e(n, -1);            // вершины
+	set <pair<int, int> > q;
+	int totalMSTSum = 0;                  // сумма всех весов MST
+
+	min_e[0] = 0;
+	q.insert(make_pair(0, 0));
+
+	if (format == 'C') {
+		// основной цикл
+		for (int i = 0; i < n; i++) {
+			int v = -1;
+			for (int j = 0; j < n; j++) {
+				if (!visited[j] && (v == -1 || min_e[j] < min_e[v])) {
+					v = j;
+				}
+			}
+
+			visited[v] = true;
+			for (int to = 0; to < n; to++) {
+				if (!visited[to] && graph[v][to] != 0 && graph[v][to] < min_e[to]) {
+					min_e[to] = graph[v][to];
+					sel_e[to] = v;
 				}
 			}
 		}
 
-		if (index != -1) {
-			result.push_back(min_w);
-			visited[index] = 1;
-			ng.addEdge(f_index + 1, index + 1, min_w); // добавляем ребро
+		for (int i = 0; i < n; i++) {
+			if (sel_e[i] != -1) {
+				ng.addEdge(sel_e[i] + 1, i + 1, graph[sel_e[i]][i]);
+				totalMSTSum += graph[sel_e[i]][i];
+			}
 		}
 	}
+	else if (format == 'L') {
+		for (int i = 0; i < n; i++) {
+			int v = q.begin()->second;
+			q.erase(q.begin());
 
-	for (int i = 0; i < result.size(); i++) {
-		cout << result[i] << " ";
-	}
-	cout << endl;
+			for (size_t j = 0; j < graph3[v].size(); j++) {
+				int to = graph3[v][j].first - 1,
+					cost = graph3[v][j].second;
+				if (cost < min_e[to]) {
+					q.erase(make_pair(min_e[to], to));
+					min_e[to] = cost;
+					sel_e[to] = v;
+					q.insert(make_pair(min_e[to], to));
+				}
+			}
+		}
 
-	for (int i = 0; i < visited.size(); i++) {
-		if (visited[i])
-			cout << i + 1 << " ";
+		for (int i = 0; i < n; i++) {
+			if (sel_e[i] != -1) {
+				ng.addEdge(sel_e[i] + 1, i + 1, min_e[i]);
+				totalMSTSum += min_e[i];
+			}
+		}
 	}
-	cout << endl;
+	else if (format == 'E') {
+		this->transformToAdjMatrix();
+
+		// основной цикл
+		for (int i = 0; i < n; i++) {
+			int v = -1;
+			for (int j = 0; j < n; j++) {
+				if (!visited[j] && (v == -1 || min_e[j] < min_e[v])) {
+					v = j;
+				}
+			}
+
+			visited[v] = true;
+			for (int to = 0; to < n; to++) {
+				if (!visited[to] && graph[v][to] != 0 && graph[v][to] < min_e[to]) {
+					min_e[to] = graph[v][to];
+					sel_e[to] = v;
+				}
+			}
+		}
+
+		for (int i = 0; i < n; i++) {
+			if (sel_e[i] != -1) {
+				ng.addEdge(sel_e[i] + 1, i + 1, graph[sel_e[i]][i]);
+				totalMSTSum += graph[sel_e[i]][i];
+			}
+		}
+
+		//this->transformToListOfEdges();
+	}
+
+	for (int i = 0; i < n; i++) {
+		cout << sel_e[i] << " " << min_e[i] << " " << endl;
+	}
+
+	cout << "Sum: " << totalMSTSum << endl;
 
 	return ng;
 }
 
+// сортировка по стобцу
+bool sortcol(const tuple<int, int, int>& v1,
+	const tuple<int, int, int>& v2) {
+	return get<2>(v1) < get<2>(v2);
+}
+
 Graph Graph::getSpaningTreeKruscal()
 {
-	return Graph();
+	char transformedFrom;
+	if (format != 'E') {
+		transformedFrom = format;
+		this->transformToListOfEdges();
+	}
+
+	Graph ng = Graph(n, 'E');
+	int cost = 0;
+	vector <pair<int, int> > res;
+	DSU dsu = DSU(n);
+
+	sort(graph5.begin(), graph5.end(), sortcol);
+
+	/*for (int i = 0; i < graph5.size(); i++) {
+		cout << get<0>(graph5[i]) << " " << get<1>(graph5[i]) << " " << get<2>(graph5[i]) << endl;
+	}*/
+
+	for (int i = 0; i < m; i++) {
+		int a = get<0>(graph5[i]) - 1,
+			b = get<1>(graph5[i]) - 1,
+			w = get<2>(graph5[i]);
+
+		if (dsu.find(a) != dsu.find(b)) {
+			cost += w;
+			res.push_back(make_pair(a, b));
+			dsu.unite(a, b);
+			ng.addEdge(a + 1, b + 1, w);
+		}
+	}
+
+	cout << cost << endl;
+	cout << endl;
+	/*for (int i = 0; i < res.size(); i++) {
+		cout << res[i].first << " " << res[i].second << endl;
+	}*/
+
+	switch (transformedFrom) {
+	case 'C':
+		this->transformToAdjMatrix();
+		break;
+	case 'L':
+		this->transformToAdjList();
+		break;
+	}
+
+	return ng;
 }
 
 Graph Graph::getSpaningTreeBoruvka()
