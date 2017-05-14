@@ -8,6 +8,7 @@
 #include <tuple>
 #include <algorithm>
 #include <set>
+#include <stdio.h>
 #include "DSU.h"
 
 using namespace std;
@@ -78,9 +79,9 @@ private:
 	void transformLToListOfEdges();
 
 	// read
-	void readAdjMatrix(ifstream&);
-	void readAdjList(ifstream&);
-	void readListOfEdges(ifstream&);
+	void readAdjMatrix(FILE&);
+	void readAdjList(FILE&);
+	void readListOfEdges(FILE&);
 
 	// write
 	void writeAdjMatrix(ofstream&);

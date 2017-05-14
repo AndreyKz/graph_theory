@@ -34,63 +34,50 @@ Graph::Graph(int num, char form)
 	}
 }
 
-void Graph::readAdjMatrix(ifstream & f) {
-	f >> n >> r >> w;
+void Graph::readAdjMatrix(FILE & f) {
+	fscanf(&f, "%d%d%d", &n, &r, &w);
 
 	int t;
 	graph.resize(n);
 	sorted_v.resize(n);
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
-			f >> t;
+			fscanf(&f, "%d", &t);
 			graph[i].push_back(t);
-
-			// если взвешенный заполняем массив с отсортированными весами
-			if (w && t != 0) {
-				sorted_v[i].push_back(make_pair(t, j));
-			}
 		}
 	}
-
-	if (w) {
-		for (int i = 0; i < n; i++) {
-			sort(sorted_v[i].begin(), sorted_v[i].end());
-			reverse(sorted_v[i].begin(), sorted_v[i].end());
-		}
-	}
-
-	// cout << sorted_v[0].first << " " << sorted_v[sorted_v.size() - 1].first << endl;
 }
 
-void Graph::readAdjList(ifstream & f) {
-	string str;
+void Graph::readAdjList(FILE & f) {
+	const int MAX_ELEM = 100;
+	char str[MAX_ELEM];
 
-	f >> n >> r >> w;
-	getline(f, str);
+	fscanf(&f, "%d%d%d", &n, &r, &w);
+	fgets(str, MAX_ELEM, &f);
 
 	graph2.resize(n);
 	graph3.resize(n);
 	for (int i = 0; i < n; i++) {
-		getline(f, str);
+		fgets(str, MAX_ELEM, &f);
 
 		vector<string> arr;
-		string delim(" ");
-		size_t prev = 0;
-		size_t next;
-		size_t delta = delim.length();
+		
+		string digit = "";
+		for (int j = 0; j < MAX_ELEM; j++) {
+			if (str[j] == '\0' || str[j] == '\n') {
+				if (digit != "")
+					arr.push_back(digit);
+				break;
+			}
 
-		arr.clear();
+			if (str[j] == ' ' && digit != "") {
+				arr.push_back(digit);
+				digit = "";
+				continue;
+			}
 
-		while ((next = str.find(delim, prev)) != string::npos) {
-			string tmp = str.substr(prev, next - prev);
-
-			arr.push_back(str.substr(prev, next - prev));
-			prev = next + delta;
+			digit += str[j];
 		}
-
-		string tmp = str.substr(prev);
-
-		arr.push_back(str.substr(prev));
 
 		// если в конце был пробел, убираем его
 		if (arr[arr.size() - 1] == "")
@@ -111,19 +98,19 @@ void Graph::readAdjList(ifstream & f) {
 	}
 }
 
-void Graph::readListOfEdges(ifstream & f) {
-	f >> n >> m >> r >> w;
+void Graph::readListOfEdges(FILE & f) {
+	fscanf(&f, "%d%d%d%d", &n, &m, &r, &w);
 
 	int ai, bi, wi;
 	if (w) {
 		for (int i = 0; i < m; i++) {
-			f >> ai >> bi >> wi;
+			fscanf(&f, "%d%d%d", &ai, &bi, &wi);
 			graph5.push_back(make_tuple(ai, bi, wi));
 		}
 	}
 	else {
 		for (int i = 0; i < m; i++) {
-			f >> ai >> bi;
+			fscanf(&f, "%d%d", &ai, &bi);
 			graph4.push_back(make_pair(ai, bi));
 		}
 	}
@@ -131,25 +118,25 @@ void Graph::readListOfEdges(ifstream & f) {
 
 void Graph::readGraph(string fileName){
     const char *cstr = fileName.c_str(); // хз, но string не хотел принимать
-    ifstream f(cstr);
 
-	//f.open(cstr, ios_base::in | ios_base::binary);
+	FILE *f;
+	f = fopen(cstr, "r");
 
-    f >> format; // представление графа
+	fscanf(f, "%c", &format);
 
     switch(format){
     case 'C': // матрица смежности
-		readAdjMatrix(f);
+		readAdjMatrix(*f);
         break;
     case 'L': // список смежности
-		readAdjList(f);
+		readAdjList(*f);
 		break;
     case 'E': // список ребер
-		readListOfEdges(f);
+		readListOfEdges(*f);
         break;
     }
 
-    f.close();
+    fclose(f);
 }
 
 void Graph::writeAdjMatrix(ofstream & f) {
