@@ -107,11 +107,31 @@ void Graph::readListOfEdges(FILE & f) {
 			fscanf(&f, "%d%d%d", &ai, &bi, &wi);
 			graph5.push_back(make_tuple(ai, bi, wi));
 		}
+
+		// если в конце завелся дубликат
+		if (graph5.size() > 1) {
+			int prev_a = get<0>(graph5[graph5.size() - 2]);
+			int prev_b = get<1>(graph5[graph5.size() - 2]);
+			int curr_a = get<0>(graph5[graph5.size() - 1]);
+			int curr_b = get<1>(graph5[graph5.size() - 1]);
+			if (prev_a == curr_a && prev_b == curr_b)
+				graph5.pop_back();
+		}
 	}
 	else {
 		while (!feof(&f)) {
 			fscanf(&f, "%d%d", &ai, &bi);
 			graph4.push_back(make_pair(ai, bi));
+		}
+
+		// если в конце завелся дубликат
+		if (graph4.size() > 1) {
+			int prev_a = graph4[graph4.size() - 2].first;
+			int prev_b = graph4[graph4.size() - 2].second;
+			int curr_a = graph4[graph4.size() - 1].first;
+			int curr_b = graph4[graph4.size() - 1].second;
+			if (prev_a == curr_a && prev_b == curr_b)
+				graph4.pop_back();
 		}
 	}
 }
@@ -753,6 +773,98 @@ Graph Graph::getSpaningTreeBoruvka()
 	cout << "MST: " << cost << endl;
 
 	return ng;
+}
+
+int Graph::checkEuler(bool &circleExist)
+{
+	circleExist = false;
+
+	vector <int> degree(n, 0); // степени вершин
+	DSU dsu = DSU(n);
+
+	if (format == 'C') {
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				if (graph[i][j]) {
+					degree[i]++;
+					dsu.unite(i, j);
+				}
+			}
+		}
+	}
+	else if (format == 'L') {
+		if (!w) {
+			for (int i = 0; i < graph2.size(); i++) {
+				for (int j = 0; j < graph2[i].size(); j++) {
+					dsu.unite(i, graph2[i][j] - 1);
+					degree[i]++;
+				}
+			}
+		}
+		else {
+			for (int i = 0; i < graph3.size(); i++) {
+				for (int j = 0; j < graph3[i].size(); j++) {
+					dsu.unite(i, graph3[i][j].first - 1);
+					degree[i]++;
+				}
+			}
+		}
+	}
+	else if (format == 'E') {
+		if (!w) {
+			for (int i = 0; i < graph4.size(); i++) {
+				dsu.unite(graph4[i].first - 1, graph4[i].second - 1);
+				degree[graph4[i].first - 1]++;
+			}
+		}
+		else {
+			for (int i = 0; i < graph5.size(); i++) {
+				dsu.unite(get<0>(graph5[i]) - 1, get<1>(graph5[i]) - 1);
+				degree[get<0>(graph5[i]) - 1]++;
+			}
+		}
+	}
+
+	int countOddDegree = 0;
+	int startVertex = 0;
+	for (int i = 0; i < degree.size(); i++) {
+		if (degree[i] % 2 == 1) {
+			countOddDegree++;
+			startVertex = i;
+		}
+	}
+
+	int countCons = 0;  // количество областей связности с больше чем одной вершиной
+	for (int i = 0; i < dsu.rank.size(); i++) {
+		if (dsu.rank[i] > 1) {
+			countCons++;
+			if (!countOddDegree) {
+				startVertex = i;
+			}
+		}
+	}
+
+	if (!countOddDegree)
+		circleExist = true;
+
+	if (countOddDegree > 2 || countCons > 1) {
+		return 0;
+	}
+	else {
+		return startVertex;
+	}
+
+	return 0;
+}
+
+vector<int> Graph::getEuleranTourFleri()
+{
+	return vector<int>();
+}
+
+vector<int> Graph::getEuleranTourEffective()
+{
+	return vector<int>();
 }
 
 int Graph::changeEdge(int from, int to, int weight) {

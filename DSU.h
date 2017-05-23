@@ -6,10 +6,10 @@ using namespace std;
 
 class DSU
 {
-private:
+public:
 	vector <int> p;
 	vector <int> rank;
-public:
+
 	DSU();
 	DSU(int);
 

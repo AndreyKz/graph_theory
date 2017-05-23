@@ -44,6 +44,11 @@ public:
 	Graph getSpaningTreeKruscal();
 	Graph getSpaningTreeBoruvka();
 
+	// Алгоритмы для эйлерова пути (цикла)
+	int checkEuler(bool &);
+	vector <int> getEuleranTourFleri();
+	vector <int> getEuleranTourEffective();
+
 	string getHello();
 
 	virtual ~Graph();

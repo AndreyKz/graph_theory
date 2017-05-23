@@ -31,8 +31,9 @@ void DSU::unite(int x, int y)
 	else
 		p[y] = x;
 
-	if (rank[x] == rank[y])
-		++rank[x];
+	rank[x] += rank[y];
+	/*if (rank[x] == rank[y])
+		++rank[x];*/
 }
 
 
