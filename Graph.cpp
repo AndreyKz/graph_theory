@@ -49,7 +49,7 @@ void Graph::readAdjMatrix(FILE & f) {
 }
 
 void Graph::readAdjList(FILE & f) {
-	const int MAX_ELEM = 100;
+	const int MAX_ELEM = 200000;
 	char str[MAX_ELEM];
 
 	fscanf(&f, "%d%d%d", &n, &r, &w);
@@ -103,13 +103,13 @@ void Graph::readListOfEdges(FILE & f) {
 
 	int ai, bi, wi;
 	if (w) {
-		for (int i = 0; i < m; i++) {
+		while (!feof(&f)) {
 			fscanf(&f, "%d%d%d", &ai, &bi, &wi);
 			graph5.push_back(make_tuple(ai, bi, wi));
 		}
 	}
 	else {
-		for (int i = 0; i < m; i++) {
+		while (!feof(&f)) {
 			fscanf(&f, "%d%d", &ai, &bi);
 			graph4.push_back(make_pair(ai, bi));
 		}
@@ -140,7 +140,7 @@ void Graph::readGraph(string fileName){
 }
 
 void Graph::writeAdjMatrix(FILE & f) {
-	fprintf(&f, " %d\n%d %d", n, r, w);
+	fprintf(&f, " %d\n%d %d\n", n, r, w);
 
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
@@ -496,10 +496,9 @@ Graph Graph::getSpaningTreePrima()
 	set <pair<int, int> > q;
 	int totalMSTSum = 0;                  // сумма всех весов MST
 
-	min_e[0] = 0;
-	q.insert(make_pair(0, 0));
-
 	if (format == 'C') {
+		min_e[0] = 0;
+
 		// основной цикл
 		for (int i = 0; i < n; i++) {
 			int v = -1;
@@ -525,20 +524,35 @@ Graph Graph::getSpaningTreePrima()
 			}
 		}
 	}
-	else if (format == 'L') {
-		for (int i = 0; i < n; i++) {
-			int v = q.begin()->second;
-			q.erase(q.begin());
+	else if (format == 'L' || format == 'E') {
+		if (format == 'E') {
+			this->transformToAdjList();
+		}
 
-			for (size_t j = 0; j < graph3[v].size(); j++) {
-				int to = graph3[v][j].first - 1,
-					cost = graph3[v][j].second;
-				if (cost < min_e[to]) {
-					q.erase(make_pair(min_e[to], to));
-					min_e[to] = cost;
-					sel_e[to] = v;
-					q.insert(make_pair(min_e[to], to));
+		int start = 0;
+		while (start < n) {
+			min_e[start] = 0;
+			q.insert(make_pair(0, start));
+
+			while (!q.empty()) {
+				int v = q.begin()->second;
+				q.erase(q.begin());
+				visited[v] = true;
+
+				for (size_t j = 0; j < graph3[v].size(); j++) {
+					int to = graph3[v][j].first - 1,
+						cost = graph3[v][j].second;
+					if (!visited[to] && cost < min_e[to]) {
+						q.erase(make_pair(min_e[to], to));
+						min_e[to] = cost;
+						sel_e[to] = v;
+						q.insert(make_pair(min_e[to], to));
+					}
 				}
+			}
+
+			while (start < n && visited[start]) {
+				start++;
 			}
 		}
 
@@ -549,40 +563,10 @@ Graph Graph::getSpaningTreePrima()
 			}
 		}
 	}
-	else if (format == 'E') {
-		this->transformToAdjMatrix();
 
-		// основной цикл
-		for (int i = 0; i < n; i++) {
-			int v = -1;
-			for (int j = 0; j < n; j++) {
-				if (!visited[j] && (v == -1 || min_e[j] < min_e[v])) {
-					v = j;
-				}
-			}
-
-			visited[v] = true;
-			for (int to = 0; to < n; to++) {
-				if (!visited[to] && graph[v][to] != 0 && graph[v][to] < min_e[to]) {
-					min_e[to] = graph[v][to];
-					sel_e[to] = v;
-				}
-			}
-		}
-
-		for (int i = 0; i < n; i++) {
-			if (sel_e[i] != -1) {
-				ng.addEdge(sel_e[i] + 1, i + 1, graph[sel_e[i]][i]);
-				totalMSTSum += graph[sel_e[i]][i];
-			}
-		}
-
-		//this->transformToListOfEdges();
-	}
-
-	for (int i = 0; i < n; i++) {
+	/*for (int i = 0; i < n; i++) {
 		cout << sel_e[i] << " " << min_e[i] << " " << endl;
-	}
+	}*/
 
 	cout << "Sum: " << totalMSTSum << endl;
 
@@ -597,13 +581,13 @@ bool sortcol(const tuple<int, int, int>& v1,
 
 Graph Graph::getSpaningTreeKruscal()
 {
-	char transformedFrom;
+	char transformedFrom = 'E';
 	if (format != 'E') {
 		transformedFrom = format;
 		this->transformToListOfEdges();
 	}
 
-	Graph ng = Graph(n, 'E');
+	Graph ng = Graph(n, transformedFrom);
 	int cost = 0;
 	vector <pair<int, int> > res;
 	DSU dsu = DSU(n);
@@ -647,7 +631,128 @@ Graph Graph::getSpaningTreeKruscal()
 
 Graph Graph::getSpaningTreeBoruvka()
 {
-	return Graph();
+	Graph ng = Graph(n , format);
+
+	DSU dsu = DSU(n);
+	vector <int> minEdge(n);
+	vector <int> sel_e(n);
+	int cost = 0;
+
+	int INF = 0;  // ищем максимум
+	if (format == 'E') {
+		for (int k = 0; k < graph5.size(); k++) {
+			if (get<2>(graph5[k]) > INF)
+				INF = get<2>(graph5[k]) + 1;
+		}
+	}
+	else if (format == 'L') {
+		for (int k = 0; k < graph3.size(); k++) {
+			for (int j = 0; j < graph3[k].size(); j++) {
+				if (graph3[k][j].second > INF)
+					INF = graph3[k][j].second + 1;
+			}
+		}
+	}
+	else if (format == 'C') {
+		for (int k = 0; k < graph.size(); k++) {
+			for (int j = 0; j < graph[k].size(); j++) {
+				if (graph[k][j] > INF)
+					INF = graph[k][j] + 1;
+			}
+		}
+	}
+
+	// основной цикл
+	int ng_m = 0;  // количество пройденных ребер
+	while (ng_m < n - 1) {
+		for (int i = 0; i < minEdge.size(); i++) {
+			minEdge[i] = INF;
+		}
+
+		for (int i = 0; i < sel_e.size(); i++) {
+			sel_e[i] = -1;
+		}
+		
+		if (format == 'E') {
+			for (int i = 0; i < graph5.size(); i++) {
+				int a = dsu.find(get<0>(graph5[i]) - 1);
+				int b = dsu.find(get<1>(graph5[i]) - 1);
+				int w = get<2>(graph5[i]);
+				if (a != b) {
+					if (minEdge[a] > w) {
+						minEdge[a] = w;
+						sel_e[a] = b;
+					}
+					if (minEdge[b] > w) {
+						minEdge[b] = w;
+						sel_e[b] = a;
+					}
+				}
+			}
+		}
+		else if (format == 'L') {
+			for (int i = 0; i < graph3.size(); i++) {
+				for (int j = 0; j < graph3[i].size(); j++) {
+					int a = dsu.find(i);
+					int b = dsu.find(graph3[i][j].first - 1);
+					int w = graph3[i][j].second;
+					if (a != b) {
+						if (minEdge[a] > w) {
+							minEdge[a] = w;
+							sel_e[a] = b;
+						}
+						if (minEdge[b] > w) {
+							minEdge[b] = w;
+							sel_e[b] = a;
+						}
+					}
+				}
+			}
+		}
+		else if (format == 'C') {
+			for (int i = 0; i < graph.size(); i++) {
+				for (int j = 0; j < graph[i].size(); j++) {
+					int a = dsu.find(i);
+					int b = dsu.find(j);
+					int w = graph[i][j];
+					if (w != 0 && a != b) {
+						if (minEdge[a] > w) {
+							minEdge[a] = w;
+							sel_e[a] = b;
+						}
+						if (minEdge[b] > w) {
+							minEdge[b] = w;
+							sel_e[b] = a;
+						}
+					}
+				}
+			}
+		}
+
+		// если больше нет ребер, то выходим
+		bool noEdges = true;
+		for (int i = 0; i < sel_e.size(); i++) {
+			if (sel_e[i] != -1)
+				noEdges = false;
+		}
+		if (noEdges)
+			break;
+
+		// добавляем ребра в граф
+		for (int i = 0; i < minEdge.size(); i++) {
+			if (minEdge[i] != INF && sel_e[i] != -1 && dsu.find(i) != dsu.find(sel_e[i])) {
+				ng.addEdge(i + 1, sel_e[i] + 1, minEdge[i]);
+				cost += minEdge[i];
+				dsu.unite(i, sel_e[i]);
+				ng_m++;
+				//cout << i + 1 << " " << sel_e[i] + 1 << " " << minEdge[i] << endl;
+			}
+		}
+	}
+
+	cout << "MST: " << cost << endl;
+
+	return ng;
 }
 
 int Graph::changeEdge(int from, int to, int weight) {
@@ -761,13 +866,21 @@ void Graph::transformCToAdjList() {
 
 void Graph::transformEToAdjList() {
 	if (w) {
+		graph3.resize(n);
 		for (int i = 0; i < graph5.size(); i++) {
 			graph3[get<0>(graph5[i]) - 1].push_back(make_pair(get<1>(graph5[i]), get<2>(graph5[i])));
+			if (!r) {
+				graph3[get<1>(graph5[i]) - 1].push_back(make_pair(get<0>(graph5[i]), get<2>(graph5[i])));
+			}
 		}
 	}
 	else {
+		graph2.resize(n);
 		for (int i = 0; i < graph4.size(); i++) {
 			graph2[graph4[i].first - 1].push_back(graph4[i].second);
+			if (!r) {
+				graph2[graph4[i].second - 1].push_back(graph4[i].first);
+			}
 		}
 	}
 }
