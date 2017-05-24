@@ -10,6 +10,7 @@
 #include <set>
 #include <stdio.h>
 #include "DSU.h"
+#include <queue>
 
 using namespace std;
 
@@ -108,5 +109,7 @@ private:
 	int changeAdjList(int, int, int = 0);
 	int changeListOfEdges(int, int, int = 0);
 
+	// bfs
+	bool bfs(int, int);
 };
 #endif // GRAPH_H

@@ -8,12 +8,14 @@ int main()
 	setlocale(LC_ALL, "russian");
 
     Graph g = Graph();
-    g.readGraph("tests/test_al_min_2.txt");
+    g.readGraph("input.txt");
 
     cout << g.getHello() << endl;
 
 	bool circleExist;
-	cout << g.checkEuler(circleExist) << endl;
+	if (g.checkEuler(circleExist)) {
+		g.getEuleranTourFleri();
+	}
 
 	
 

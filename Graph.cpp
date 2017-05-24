@@ -830,7 +830,7 @@ int Graph::checkEuler(bool &circleExist)
 	for (int i = 0; i < degree.size(); i++) {
 		if (degree[i] % 2 == 1) {
 			countOddDegree++;
-			startVertex = i;
+			startVertex = i + 1;
 		}
 	}
 
@@ -839,7 +839,7 @@ int Graph::checkEuler(bool &circleExist)
 		if (dsu.rank[i] > 1) {
 			countCons++;
 			if (!countOddDegree) {
-				startVertex = i;
+				startVertex = i + 1;
 			}
 		}
 	}
@@ -853,12 +853,80 @@ int Graph::checkEuler(bool &circleExist)
 	else {
 		return startVertex;
 	}
+}
 
-	return 0;
+// возвращает true если дошел до вершины b
+// принимает ребро (a, b) которое нужно удалить
+bool Graph::bfs(int a, int b) {
+	vector <bool> visited(n, false); // посещенные вершины
+	queue <int> q;
+
+	q.push(a);
+	visited[a] = true;
+	while (!q.empty()) {
+		int v = q.front();
+		q.pop();
+
+		if (format == 'C') {
+			for (int i = 0; i < graph[v].size(); i++) {
+				int to = i;
+
+				if (v == a && b == to)
+					continue;
+
+				if (!visited[to] && graph[v][i]) {
+					visited[to] = true;
+					q.push(to);
+				}
+			}
+		}
+		else if (format == 'L') {
+			if (!w) {
+				for (int i = 0; i < graph2[v].size(); i++) {
+					int to = graph2[v][i] - 1;
+
+					if (v == a && b == to)
+						continue;
+
+					if (!visited[to]) {
+						visited[to] = true;
+						q.push(to);
+					}
+				}
+			}
+			else {
+				for (int i = 0; i < graph3[v].size(); i++) {
+					int to = graph3[v][i].first - 1;
+
+					if (v == a && b == to)
+						continue;
+
+					if (!visited[to]) {
+						visited[to] = true;
+						q.push(to);
+					}
+				}
+			}
+		}
+		else if (format == 'E') {
+			// TODO
+		}
+	}
+
+	for (int i = 0; i < visited.size(); i++) {
+		cout << visited[i] << " ";
+	}
+
+	if (visited[b])
+		return true;
+
+	return false;
 }
 
 vector<int> Graph::getEuleranTourFleri()
 {
+	cout << bfs(0, 1) << endl;
+
 	return vector<int>();
 }
 
