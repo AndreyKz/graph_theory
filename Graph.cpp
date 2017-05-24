@@ -938,6 +938,12 @@ vector<int> Graph::getEuleranTourFleri(int start)
 	vector <int> path;  // путь вершин
 	set <pair <int, int> > visited;  // посещенные ребра
 
+	bool transformed = false;
+	if (format == 'E') {
+		this->transformToAdjList();
+		transformed = true;
+	}
+
 	int v = --start; // начальная вершина
 	if (format == 'C') {
 		while (visited.size() < m) {
@@ -1078,7 +1084,11 @@ vector<int> Graph::getEuleranTourFleri(int start)
 		}
 	}
 	else if (format == 'E') {
+		// TODO
+	}
 
+	if (transformed) {
+		this->transformToListOfEdges();
 	}
 
 
@@ -1212,6 +1222,16 @@ void Graph::transformEToAdjList() {
 	else {
 		graph2.resize(n);
 		for (int i = 0; i < graph4.size(); i++) {
+			bool next = false;
+			for (int j = 0; j < graph2[graph4[i].first - 1].size(); j++) {
+				if (graph2[graph4[i].first - 1][j] == graph4[i].second) {
+					next = true;
+					break;
+				}
+			}
+			if (next)
+				continue;
+
 			graph2[graph4[i].first - 1].push_back(graph4[i].second);
 			if (!r) {
 				graph2[graph4[i].second - 1].push_back(graph4[i].first);
