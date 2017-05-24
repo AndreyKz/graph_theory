@@ -8,13 +8,20 @@ int main()
 	setlocale(LC_ALL, "russian");
 
     Graph g = Graph();
-    g.readGraph("input.txt");
+    g.readGraph("143matrix.txt");
 
     cout << g.getHello() << endl;
 
 	bool circleExist;
-	if (g.checkEuler(circleExist)) {
-		g.getEuleranTourFleri();
+	int startVertex;
+	vector <int> path;
+	if (startVertex = g.checkEuler(circleExist)) {
+		cout << "Circle Exist " << circleExist << endl;
+		path = g.getEuleranTourFleri(startVertex);
+	}
+
+	for (int i = 0; i < path.size(); i++) {
+		cout << path[i] + 1 << " ";
 	}
 
 	

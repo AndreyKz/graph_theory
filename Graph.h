@@ -47,7 +47,7 @@ public:
 
 	// Алгоритмы для эйлерова пути (цикла)
 	int checkEuler(bool &);
-	vector <int> getEuleranTourFleri();
+	vector <int> getEuleranTourFleri(int);
 	vector <int> getEuleranTourEffective();
 
 	string getHello();

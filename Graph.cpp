@@ -44,8 +44,12 @@ void Graph::readAdjMatrix(FILE & f) {
 		for (int j = 0; j < n; j++) {
 			fscanf(&f, "%d", &t);
 			graph[i].push_back(t);
+			if (graph[i][j])
+				m++;
 		}
 	}
+
+	m /= 2;
 }
 
 void Graph::readAdjList(FILE & f) {
@@ -913,9 +917,9 @@ bool Graph::bfs(int a, int b) {
 		}
 	}
 
-	for (int i = 0; i < visited.size(); i++) {
+	/*for (int i = 0; i < visited.size(); i++) {
 		cout << visited[i] << " ";
-	}
+	}*/
 
 	if (visited[b])
 		return true;
@@ -923,11 +927,58 @@ bool Graph::bfs(int a, int b) {
 	return false;
 }
 
-vector<int> Graph::getEuleranTourFleri()
+vector<int> Graph::getEuleranTourFleri(int start)
 {
-	cout << bfs(0, 1) << endl;
+	vector <int> path;  // путь вершин
+	set <pair <int, int> > visited;  // посещенные ребра
 
-	return vector<int>();
+	int v = --start; // начальная вершина
+	while (visited.size() < m) {
+		int bridge = -1;
+		int old_v = v; // сохраняем
+		for (int i = 0; i < graph[v].size(); i++) {
+			if (v == i)
+				continue;
+
+			if (bridge == -1 && !bfs(v, i)) { // если мост
+				bridge = i;
+				continue;
+			}
+			
+			bool visited_e = false;  // посещено ребро или нет
+			if (v < i)
+				visited_e = visited.find(make_pair(v, i)) != visited.end();
+			else
+				visited_e = visited.find(make_pair(i, v)) != visited.end();
+
+			if (graph[v][i] && !visited_e) {  // если не посещено и есть ребро
+				if (v < i)
+					visited.insert(make_pair(v, i));
+				else
+					visited.insert(make_pair(i, v));
+
+				path.push_back(v);
+
+				v = i;  // теперь с этой вершины продолжаем
+
+				continue;
+			}
+		}
+
+		if (v == old_v && bridge != -1) { // никуда не ушли - идем по мосту если есть
+			if (v < bridge)
+				visited.insert(make_pair(v, bridge));
+			else
+				visited.insert(make_pair(bridge, v));
+
+			path.push_back(v);
+
+			v = bridge;  // теперь с этой вершины продолжаем
+		}
+	}
+	path.push_back(v);
+
+	return path;
 }
 
 vector<int> Graph::getEuleranTourEffective()
