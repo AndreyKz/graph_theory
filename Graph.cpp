@@ -89,17 +89,23 @@ void Graph::readAdjList(FILE & f) {
 
 		if (w) {
 			for (int j = 0; j < arr.size(); j += 2) {
-				if (stoi(arr[j]))
+				if (stoi(arr[j])) {
 					graph3[i].push_back(make_pair(stoi(arr[j]), stoi(arr[j + 1])));
+					m++;
+				}
 			}
 		}
 		else {
 			for (int j = 0; j < arr.size(); j++) {
-				if (stoi(arr[j]))
+				if (stoi(arr[j])) {
 					graph2[i].push_back(stoi(arr[j]));
+					m++;
+				}
 			}
 		}
 	}
+
+	m /= 2;
 }
 
 void Graph::readListOfEdges(FILE & f) {
@@ -933,50 +939,148 @@ vector<int> Graph::getEuleranTourFleri(int start)
 	set <pair <int, int> > visited;  // посещенные ребра
 
 	int v = --start; // начальная вершина
-	while (visited.size() < m) {
-		int bridge = -1;
-		int old_v = v; // сохраняем
-		for (int i = 0; i < graph[v].size(); i++) {
-			if (v == i)
-				continue;
+	if (format == 'C') {
+		while (visited.size() < m) {
+			int bridge = -1;
+			int old_v = v; // сохраняем
+			for (int i = 0; i < graph[v].size(); i++) {
+				if (v == i)
+					continue;
 
-			if (bridge == -1 && !bfs(v, i)) { // если мост
-				bridge = i;
-				continue;
-			}
-			
-			bool visited_e = false;  // посещено ребро или нет
-			if (v < i)
-				visited_e = visited.find(make_pair(v, i)) != visited.end();
-			else
-				visited_e = visited.find(make_pair(i, v)) != visited.end();
+				if (bridge == -1 && !bfs(v, i)) { // если мост
+					bridge = i;
+					continue;
+				}
 
-			if (graph[v][i] && !visited_e) {  // если не посещено и есть ребро
+				bool visited_e = false;  // посещено ребро или нет
 				if (v < i)
-					visited.insert(make_pair(v, i));
+					visited_e = visited.find(make_pair(v, i)) != visited.end();
 				else
-					visited.insert(make_pair(i, v));
+					visited_e = visited.find(make_pair(i, v)) != visited.end();
+
+				if (graph[v][i] && !visited_e) {  // если не посещено и есть ребро
+					if (v < i)
+						visited.insert(make_pair(v, i));
+					else
+						visited.insert(make_pair(i, v));
+
+					path.push_back(v);
+
+					v = i;  // теперь с этой вершины продолжаем
+
+					continue;
+				}
+			}
+
+			if (v == old_v && bridge != -1) { // никуда не ушли - идем по мосту если есть
+				if (v < bridge)
+					visited.insert(make_pair(v, bridge));
+				else
+					visited.insert(make_pair(bridge, v));
 
 				path.push_back(v);
 
-				v = i;  // теперь с этой вершины продолжаем
-
-				continue;
+				v = bridge;  // теперь с этой вершины продолжаем
 			}
 		}
+		path.push_back(v);
+	}
+	else if (format == 'L') {
+		if (!w) {
+			while (visited.size() < m) {
+				int bridge = -1;
+				int old_v = v; // сохраняем
+				for (int i = 0; i < graph2[v].size(); i++) {
+					int to = graph2[v][i] - 1;
 
-		if (v == old_v && bridge != -1) { // никуда не ушли - идем по мосту если есть
-			if (v < bridge)
-				visited.insert(make_pair(v, bridge));
-			else
-				visited.insert(make_pair(bridge, v));
+					if (bridge == -1 && !bfs(v, to)) { // если мост
+						bridge = to;
+						continue;
+					}
 
+					bool visited_e = false;  // посещено ребро или нет
+					if (v < to)
+						visited_e = visited.find(make_pair(v, to)) != visited.end();
+					else
+						visited_e = visited.find(make_pair(to, v)) != visited.end();
+
+					if (!visited_e) {  // если не посещено и есть ребро
+						if (v < to)
+							visited.insert(make_pair(v, to));
+						else
+							visited.insert(make_pair(to, v));
+
+						path.push_back(v);
+
+						v = to;  // теперь с этой вершины продолжаем
+
+						continue;
+					}
+				}
+
+				if (v == old_v && bridge != -1) { // никуда не ушли - идем по мосту если есть
+					if (v < bridge)
+						visited.insert(make_pair(v, bridge));
+					else
+						visited.insert(make_pair(bridge, v));
+
+					path.push_back(v);
+
+					v = bridge;  // теперь с этой вершины продолжаем
+				}
+			}
 			path.push_back(v);
+		}
+		else {
+			while (visited.size() < m) {
+				int bridge = -1;
+				int old_v = v; // сохраняем
+				for (int i = 0; i < graph3[v].size(); i++) {
+					int to = graph3[v][i].first - 1;
 
-			v = bridge;  // теперь с этой вершины продолжаем
+					if (bridge == -1 && !bfs(v, to)) { // если мост
+						bridge = to;
+						continue;
+					}
+
+					bool visited_e = false;  // посещено ребро или нет
+					if (v < to)
+						visited_e = visited.find(make_pair(v, to)) != visited.end();
+					else
+						visited_e = visited.find(make_pair(to, v)) != visited.end();
+
+					if (!visited_e) {  // если не посещено и есть ребро
+						if (v < to)
+							visited.insert(make_pair(v, to));
+						else
+							visited.insert(make_pair(to, v));
+
+						path.push_back(v);
+
+						v = to;  // теперь с этой вершины продолжаем
+
+						continue;
+					}
+				}
+
+				if (v == old_v && bridge != -1) { // никуда не ушли - идем по мосту если есть
+					if (v < bridge)
+						visited.insert(make_pair(v, bridge));
+					else
+						visited.insert(make_pair(bridge, v));
+
+					path.push_back(v);
+
+					v = bridge;  // теперь с этой вершины продолжаем
+				}
+			}
+			path.push_back(v);
 		}
 	}
-	path.push_back(v);
+	else if (format == 'E') {
+
+	}
+
 
 	return path;
 }

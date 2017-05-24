@@ -8,7 +8,7 @@ int main()
 	setlocale(LC_ALL, "russian");
 
     Graph g = Graph();
-    g.readGraph("143matrix.txt");
+    g.readGraph("input.txt");
 
     cout << g.getHello() << endl;
 
