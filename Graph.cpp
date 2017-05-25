@@ -1101,33 +1101,95 @@ vector<int> Graph::getEuleranTourEffective(int start)
 	set <pair <int, int> > visited;  // посещенные ребра
 	stack <int> q;
 
+	bool transformed = false;
+	if (format == 'E') {
+		this->transformToAdjList();
+		transformed = true;
+	}
+
 	q.push(start - 1);
 	while (!q.empty()) {
 		int v = q.top();
-		for (int i = 0; i < graph2[v].size(); i++) {
-			int to = graph2[v][i] - 1;
 
-			bool visited_e = false;  // посещено ребро или нет
-			if (v < to)
-				visited_e = visited.find(make_pair(v, to)) != visited.end();
-			else
-				visited_e = visited.find(make_pair(to, v)) != visited.end();
+		if (format == 'C') {
+			for (int i = 0; i < graph[v].size(); i++) {
+				int to = i;
+				if (v == to)
+					continue;
 
-			if (!visited_e) {  // если не посещено и есть ребро
+				bool visited_e = false;  // посещено ребро или нет
 				if (v < to)
-					visited.insert(make_pair(v, to));
+					visited_e = visited.find(make_pair(v, to)) != visited.end();
 				else
-					visited.insert(make_pair(to, v));
+					visited_e = visited.find(make_pair(to, v)) != visited.end();
 
-				q.push(to);
-				break;
+				if (graph[v][to] && !visited_e) {  // если не посещено и есть ребро
+					if (v < to)
+						visited.insert(make_pair(v, to));
+					else
+						visited.insert(make_pair(to, v));
+
+					q.push(to);
+					break;
+				}
 			}
+		}
+		else if (format == 'L') {
+			if (!w) {
+				for (int i = 0; i < graph2[v].size(); i++) {
+					int to = graph2[v][i] - 1;
+
+					bool visited_e = false;  // посещено ребро или нет
+					if (v < to)
+						visited_e = visited.find(make_pair(v, to)) != visited.end();
+					else
+						visited_e = visited.find(make_pair(to, v)) != visited.end();
+
+					if (!visited_e) {  // если не посещено и есть ребро
+						if (v < to)
+							visited.insert(make_pair(v, to));
+						else
+							visited.insert(make_pair(to, v));
+
+						q.push(to);
+						break;
+					}
+				}
+			}
+			else {
+				for (int i = 0; i < graph3[v].size(); i++) {
+					int to = graph3[v][i].first - 1;
+
+					bool visited_e = false;  // посещено ребро или нет
+					if (v < to)
+						visited_e = visited.find(make_pair(v, to)) != visited.end();
+					else
+						visited_e = visited.find(make_pair(to, v)) != visited.end();
+
+					if (!visited_e) {  // если не посещено и есть ребро
+						if (v < to)
+							visited.insert(make_pair(v, to));
+						else
+							visited.insert(make_pair(to, v));
+
+						q.push(to);
+						break;
+					}
+				}
+			}
+		}
+		else if (format == 'E') {
+			// TODO
 		}
 
 		if (v == q.top()) {
 			q.pop();
 			path.push_back(v);
 		}
+	}
+
+	if (transformed) {
+		this->transformToListOfEdges();
 	}
 
 	return path;
@@ -1246,6 +1308,16 @@ void Graph::transformEToAdjList() {
 	if (w) {
 		graph3.resize(n);
 		for (int i = 0; i < graph5.size(); i++) {
+			bool next = false;
+			for (int j = 0; j < graph3[get<0>(graph5[i]) - 1].size(); j++) {
+				if (graph3[get<0>(graph5[i]) - 1][j].first == get<1>(graph5[i])) {
+					next = true;
+					break;
+				}
+			}
+			if (next)
+				continue;
+
 			graph3[get<0>(graph5[i]) - 1].push_back(make_pair(get<1>(graph5[i]), get<2>(graph5[i])));
 			if (!r) {
 				graph3[get<1>(graph5[i]) - 1].push_back(make_pair(get<0>(graph5[i]), get<2>(graph5[i])));
