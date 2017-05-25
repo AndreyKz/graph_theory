@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "DSU.h"
 #include <queue>
+#include <stack>
 
 using namespace std;
 
@@ -48,7 +49,7 @@ public:
 	// Алгоритмы для эйлерова пути (цикла)
 	int checkEuler(bool &);
 	vector <int> getEuleranTourFleri(int);
-	vector <int> getEuleranTourEffective();
+	vector <int> getEuleranTourEffective(int);
 
 	string getHello();
 

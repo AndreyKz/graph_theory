@@ -17,7 +17,8 @@ int main()
 	vector <int> path;
 	if (startVertex = g.checkEuler(circleExist)) {
 		cout << "Circle Exist " << circleExist << endl;
-		path = g.getEuleranTourFleri(startVertex);
+		cout << "Start Vertex: " << startVertex << endl;
+		path = g.getEuleranTourEffective(startVertex);
 	}
 
 	for (int i = 0; i < path.size(); i++) {

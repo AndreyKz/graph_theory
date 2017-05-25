@@ -1095,9 +1095,42 @@ vector<int> Graph::getEuleranTourFleri(int start)
 	return path;
 }
 
-vector<int> Graph::getEuleranTourEffective()
+vector<int> Graph::getEuleranTourEffective(int start)
 {
-	return vector<int>();
+	vector <int> path;  // путь вершин
+	set <pair <int, int> > visited;  // посещенные ребра
+	stack <int> q;
+
+	q.push(start - 1);
+	while (!q.empty()) {
+		int v = q.top();
+		for (int i = 0; i < graph2[v].size(); i++) {
+			int to = graph2[v][i] - 1;
+
+			bool visited_e = false;  // посещено ребро или нет
+			if (v < to)
+				visited_e = visited.find(make_pair(v, to)) != visited.end();
+			else
+				visited_e = visited.find(make_pair(to, v)) != visited.end();
+
+			if (!visited_e) {  // если не посещено и есть ребро
+				if (v < to)
+					visited.insert(make_pair(v, to));
+				else
+					visited.insert(make_pair(to, v));
+
+				q.push(to);
+				break;
+			}
+		}
+
+		if (v == q.top()) {
+			q.pop();
+			path.push_back(v);
+		}
+	}
+
+	return path;
 }
 
 int Graph::changeEdge(int from, int to, int weight) {
